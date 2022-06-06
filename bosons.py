@@ -109,7 +109,7 @@ def concatenate_bases(Nqubits: int = 2, Ncavs: int = 0, Nfilters: int = 0, N_WGm
 
 
 def erase(remove: int, Basis: dict) -> sp.csr_matrix:
-    
+
     row = []
     column = []
     coefficient = []
@@ -132,7 +132,3 @@ def erase(remove: int, Basis: dict) -> sp.csr_matrix:
                 row.append(Basis[transformed]), column.append(Basis[v]), coefficient.append(np.sqrt(count))
                 
     return sp.csr_matrix( (coefficient, (row, column)), shape=(len(Basis), len(Basis)) )
-
-    
-Bases = concatenate_bases(Nqubits= 2, N_WGmodes= 3, Up_to_Nexcitations = 2)
-erase(2, Bases), Bases
