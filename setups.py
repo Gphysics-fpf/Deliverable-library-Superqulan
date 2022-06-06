@@ -11,15 +11,15 @@ from math import pi as π
 import math
 import copy
 import sympy as sym
-from bosons import construct_basis_superfast
+from bosons import construct_basis_superfast, concatenate_bases, diagonals_with_energies 
 
 
-class Experiment: 
+class Architecture: 
     '''class that includes the basic features that every experiment should have. Then the specific experiments inherit
     all the features from this class.'''
     
 
-class Exp2purcells2excitations(Experiment):
+class Exp2purcells2excitations(Architecture):
     
     def __init__(self, δ1=2*π*8.406, δ2=2*π*8.406, g1=2*π*0.0086, g2=2*π*0.0086, gp1=2*π*0.025, gp2=2*π*0.025,
                  ω1=2*π*8.406, ω2=2*π*8.406, ωp1= 2*π*8.406, ωp2 = 2*π*8.406,
