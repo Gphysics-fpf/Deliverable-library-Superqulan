@@ -50,6 +50,10 @@ class Exp2purcells2excitations(Architecture):
         self.Nqubits = 2
         self.Ncavs = 2
         self.Nfilters = Nfilters
+        self.qubit_indices = np.arange(0,self.Nqubits) 
+        self.cav_indices = np.arange(self.Nqubits,self.Nqubits + self.Ncavs) 
+        self.filter_indices = np.arange(self.Nqubits + self.Ncavs, self.Nqubits + self.Ncavs + self.Nfilters )
+
 
         if include_vacuum: 
             self.Basis = concatenate_bases(Nqubits = self.Nqubits, Ncavs = self.Ncavs, Nfilters = self.Nfilters, N_WGmodes = self.N_WGmodes, Up_to_Nexcitations = self.Nexcitations)

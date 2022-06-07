@@ -74,6 +74,19 @@ def transform_new(add: int, remove: int, Basis: dict) -> sp.csr_matrix:
     return sp.csr_matrix( (coefficient, (row, column)), shape=(len(Basis), len(Basis)) )
 
 
+def diagonals_with_energies(Basis: dict, E: np.ndarray) -> sp.dia_matrix:
+
+    ''' Function that takes as input the Basis and a vector with the static energies of each piece
+    of the problem. Constructs a matrix with diagonal entries the summed energy of the excitations 
+    contained in such state.'''
+
+    Energy = np.empty(len(Basis))  # initializa the energy coresponding to each vector.
+
+    for occupation, pos in Basis.items():  # Basis.items() is an iterable of the form ((keys),elements).
+
+        Energy[pos] = np.sum(E[list(occupation)])  # fill the position in the energy vector with the sum of the free energies given as inputs in E
+
+    return sp.diags(Energy)  
 
 
 def concatenate_bases(Nqubits: int = 2, Ncavs: int = 0, Nfilters: int = 0, N_WGmodes: int = 30, Up_to_Nexcitations: int = 2) -> dict:
