@@ -34,12 +34,6 @@ In the foder [examples](https://github.com/Gphysics-fpf/Deliverable-library-Supe
 ## References
 [1] Phys. Rev. Applied 17, 054038 – (2022)
 
-## TO DO list 
-- [ ] Fill in the usage subsection with a minimal example of use of the library.
-- [ ] Extend the type declaration to whole repository. 
-- [ ] Think what is the best place to accomodate the controls, in particular the routines to compute complex controls.
-- [ ] Upgrade waveguide such that it allows you to imlement different dispersion relations.
-- [ ] Think how to fit the quantum trajectories rutines in all of this, imo together with the evolution rutines is the best place.
-- [ ] Think of further examples to ilustrate the library, besides the ones we already have. GOOD CANDIDATES: State transfer with transmons, multipartite entanglement (maybe this one making use of two excitations).
+
 
 
