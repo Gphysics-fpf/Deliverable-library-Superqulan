@@ -1,8 +1,13 @@
 import itertools
-from typing import Iterable
+from typing import Iterable, Tuple, Dict
 import numpy as np
 import scipy.sparse as sp
 
+"""State: A sorted tuple of integers, denoted which modes are occupied with excitations"""
+State = tuple[int, ...]
+
+"""Basis: A dictionary mapping states to positions in a vector state"""
+Basis = dict[State, int]
 
 """ Routines for the construction of the Operators in Hilbert space """
 
@@ -11,7 +16,7 @@ def construct_basis(
     qubits: int,
     bosons: int,
     excitations: int,
-) -> dict:
+) -> Basis:
     """Construct the basis for a given number of qubits and bosons with a
     fixed number of excitations.
 
@@ -73,7 +78,7 @@ def unphysical_states(Basis_element: tuple, Nqubits: int) -> bool:
 
 
 def move_excitation_operator(
-    origin_mode: int, destination_mode: int, basis: dict
+    origin_mode: int, destination_mode: int, basis: Basis
 ) -> sp.csr_matrix:
 
     """Creates a sparse matrix representation of an operator that moves an excitation
@@ -118,7 +123,7 @@ def move_excitation_operator(
     return sp.csr_matrix((coefficient, (row, column)), shape=(len(basis), len(basis)))
 
 
-def diagonals_with_energies(basis: dict, frequencies: np.ndarray) -> sp.dia_matrix:
+def diagonals_with_energies(basis: Basis, frequencies: np.ndarray) -> sp.dia_matrix:
     """_summary_
 
     Args:
@@ -140,8 +145,8 @@ def diagonals_with_energies(basis: dict, frequencies: np.ndarray) -> sp.dia_matr
 def concatenate_bases(
     qubits: int = 2,
     bosons: int = 30,
-    Up_to_Nexcitations: int = 2,
-) -> dict:
+    excitations: int = 2,
+) -> Basis:
 
     """Function that takes as inputs the number of components of the setup and Nexcitations
     constructs the basis resulting from the concatenation of subspaces up to these Nexcitations'.
@@ -149,14 +154,14 @@ def concatenate_bases(
     Args:
         qubits (int): Number of qubits >= 0
         bosons (int): Number of bosonic modes >= 0
-        Up_to_Nexcitations (int): Number of excitations of the biggest subspace >= 0
+        excitations (int): Number of excitations of the biggest subspace >= 0
 
     Returns:
         basis: Collection of all the states that constitute the basis properly sorted.
     """
     Basis = {}
 
-    for excitations in range(Up_to_Nexcitations + 1):
+    for excitations in range(excitations + 1):
 
         if excitations == 0:
 
