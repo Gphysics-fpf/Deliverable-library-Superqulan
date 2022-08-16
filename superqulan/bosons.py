@@ -4,8 +4,6 @@ import numpy as np
 import scipy.sparse as sp
 
 
-#%matplotlib widget
-
 """ Routines for the construction of the Operators in Hilbert space """
 
 

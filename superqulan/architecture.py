@@ -4,7 +4,7 @@ from math import pi as π
 from numbers import Number
 import numpy as np
 import scipy.sparse as sp
-from waveguide import Waveguide
+from .waveguide import Waveguide
 from bosons import (
     construct_basis,
     move_excitation_operator,
