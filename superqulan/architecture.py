@@ -14,7 +14,7 @@ from .bosons import (
     construct_basis,
     move_excitation_operator,
     diagonals_with_energies,
-    concatenate_bases,
+    concatenate_basis,
 )
 
 
@@ -75,7 +75,7 @@ class Setup:
         )
 
         if self.number_conserving:
-            self.basis = concatenate_bases(
+            self.basis = concatenate_basis(
                 qubits=self.Nqubits,
                 bosons=self.Ncavities + self.Nfilters + self.waveguide.modes,
                 excitations=self.Nexcitations,
