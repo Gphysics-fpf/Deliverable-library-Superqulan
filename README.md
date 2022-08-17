@@ -8,8 +8,6 @@ This includes:
 3. Tools to simulate the dynamics of those setups.
 4. Examples of applications of those tools to analyze state transfer, implementation of gates, etc.
 
-This library has been used to model the implementation of distributed quantum gates and state transfer in two linked quantum computers, by [Guillermo F. Peñas et al, Phys. Rev. Appl. 17, 054038 (2021)](https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.17.054038). Cite this work or the Zotero reference for this repository if you use or extend this software.
-
 ## Structure
 
 The project is composed of the following elements:
@@ -31,7 +29,13 @@ pip install .
 ```
 However, this step is not required to run the notebooks in the `examples` directory.
 
-## Documentation
+## To be done
 
-TBD
+- Incorporate other waveguide representations
+- Write down examples working with two or more excitations
+- Implement simulations with qubit / waveguide decay using stochastic trajectories
+- Add documentation
 
+## Acknowledgments and references
+
+This library has been used to model the implementation of distributed quantum gates and state transfer in two linked quantum computers, by [Guillermo F. Peñas et al, Phys. Rev. Appl. 17, 054038 (2021)](https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.17.054038). Cite this work or the most up-to-date Zotero reference for this repository if you use or extend this software.
