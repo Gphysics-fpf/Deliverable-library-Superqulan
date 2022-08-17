@@ -1,8 +1,7 @@
 from re import I
 from typing import Optional, Union, Callable
 from dataclasses import dataclass, field
-from numpy._typing import ArrayLike
-from numpy.typing import NDArray
+from numpy.typing import NDArray, ArrayLike
 from math import pi as π
 from numbers import Number
 import numpy as np
@@ -108,6 +107,7 @@ class Setup:
         return wavefunction
 
     def excited_qubit(self, which=0) -> NDArray[np.double]:
+        """Return the wavefunction for a state with one excitation in the given 'qubit'."""
         if which > self.Nqubits or which < 0:
             raise Exception(f"Requested qubit {which} outside the available range")
         return self.basis_state((self.qubit_indices[which],))
