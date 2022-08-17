@@ -2,7 +2,7 @@ from ast import Call
 import numpy as np
 import scipy.sparse.linalg
 from typing import Callable, Optional, Union
-from numpy.typing import NDArray, ArrayLike, float
+from numpy.typing import NDArray, ArrayLike
 
 
 def Trotter_solver_dynamics(

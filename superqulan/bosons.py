@@ -1,6 +1,8 @@
 import itertools
 from typing import Iterable, Tuple, Dict
+import wave
 import numpy as np
+from numpy.typing import NDArray, ArrayLike
 import scipy.sparse as sp
 
 """State: A sorted tuple of integers, denoted which modes are occupied with excitations"""
@@ -82,6 +84,35 @@ def number_operator(basis: Basis, mode: int) -> sp.csr_matrix:
     for state, ndx in basis.items():
         occupation[ndx] = state.count(mode)
     return sp.csr_matrix((occupation, (rows, rows)), shape=(L, L))
+
+
+def mode_occupations(basis: Basis, wavefunction: ArrayLike) -> NDArray[np.double]:
+    """Compute the average of the modes occupations for all modes.
+
+    Assume 'basis' is the bosonic basis for 'N' modes and that 'wavefunction'
+    is a 1D vector for a state in this basis. Then 'mode_occupation' will
+    return a vector of size 'N' with the average of the occupation number
+    operators for each mode.
+
+    If 'wavefunction' is an N-dimensional array, we assume that the first index
+    is associated to the physical dimension of the basis and the same task
+    is performed for all values of the 2 to N indices.
+
+    Args:
+        basis (Basis): basis of bosonic states
+        wavefunction (ArrayLike): 1D wavefunction, or N-D collection of them
+    Returns:
+        occupations (NDArray): 1D vector of occupation numbers, or N-D collection
+        of the computations for different wavefunctions.
+    """
+    wavefunction = np.asarray(wavefunction)
+    num_modes = max(max(state) for state in basis) + 1
+    probability = np.abs(wavefunction.reshape(len(basis), -1)) ** 2
+    output = np.zeros((num_modes, probability.shape[1]))
+    for state, ndx in basis.items():
+        for mode in state:
+            output[mode, :] += probability[ndx, :]
+    return output.reshape(num_modes, *wavefunction.shape[1:])
 
 
 def move_excitation_operator(

@@ -1,5 +1,5 @@
 import unittest
-from superqulan.bosons import construct_basis, number_operator
+from superqulan.bosons import construct_basis, number_operator, mode_occupations
 from .common import *
 
 
@@ -48,3 +48,52 @@ class TestNumberOperator(unittest.TestCase):
         self.assertEqualSparse(
             number_operator(basis, 3), sp.diags([0, 0, 1, 0, 1, 0, 1, 2])
         )
+
+
+class TestModeOccupations(unittest.TestCase):
+    def test_mode_occupations_for_1_excitation_1d_array(self):
+        basis = construct_basis(qubits=2, bosons=2, excitations=1)
+        wavefunction = [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+            [0.0, np.sqrt(0.5), np.sqrt(0.5), 0.0],
+            [0.0, np.sqrt(0.5), 0.0, 1j * np.sqrt(0.5)],
+        ]
+        exact = [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+            [0.0, 0.5, 0.5, 0.0],
+            [0.0, 0.5, 0.0, 0.5],
+        ]
+        for state, exact in zip(wavefunction, exact):
+            output = mode_occupations(basis, state)
+            self.assertTrue(np.all(np.isclose(output, exact)))
+
+    def test_mode_occupations_for_1_excitation_2d_array(self):
+        basis = construct_basis(qubits=2, bosons=2, excitations=1)
+        wavefunction = np.array(
+            [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+                [0.0, np.sqrt(0.5), np.sqrt(0.5), 0.0],
+                [0.0, np.sqrt(0.5), 0.0, 1j * np.sqrt(0.5)],
+            ]
+        ).T
+        output = mode_occupations(basis, wavefunction)
+        exact = np.array(
+            [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+                [0.0, 0.5, 0.5, 0.0],
+                [0.0, 0.5, 0.0, 0.5],
+            ]
+        ).T
+        self.assertTrue(np.all(np.isclose(output, exact)))

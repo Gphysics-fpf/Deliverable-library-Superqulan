@@ -1,6 +1,7 @@
 from re import I
 from typing import Optional, Union, Callable
 from dataclasses import dataclass, field
+import wave
 from numpy.typing import NDArray, ArrayLike
 from math import pi as π
 from numbers import Number
@@ -11,6 +12,7 @@ from .bosons import (
     Basis,
     State,
     construct_basis,
+    mode_occupations,
     move_excitation_operator,
     diagonals_with_energies,
     concatenate_basis,
@@ -127,6 +129,11 @@ class Setup:
         for n, psi_n in zip(self.waveguide_indices, wavefunction):
             state[self.basis[(n,)]] = psi_n
         return state
+
+    def mode_occupations(self, wavefunction: ArrayLike) -> NDArray[np.double]:
+        """Extract the weights of the bosonic modes from a 1D or 2D array of
+        wavefunctions."""
+        return mode_occupations(self.basis, wavefunction)
 
 
 @dataclass
