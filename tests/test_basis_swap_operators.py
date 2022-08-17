@@ -1,24 +1,7 @@
 import unittest
 import scipy.sparse as sp
-import numpy as np
 from superqulan.bosons import construct_basis, move_excitation_operator, number_operator
-
-
-def equal_sparse_matrices(a, b):
-    return (a.shape == b.shape) and ((a != b).count_nonzero() == 0)
-
-
-def close_sparse_matrices(a, b):
-    return (a.shape == b.shape) and np.all(np.isclose(a.todense(), b.todense()))
-
-
-def is_zero_sparse_matrix(a):
-    return a.count_nonzero() == 0
-
-
-def sp_from_coordinates(coords, shape):
-    coords = np.asarray(coords)
-    return sp.csr_matrix((coords[:, 0], (coords[:, 1], coords[:, 2])), shape=shape)
+from .common import *
 
 
 class TestExcitationMotion(unittest.TestCase):
