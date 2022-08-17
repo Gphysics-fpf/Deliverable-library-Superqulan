@@ -1,1 +1,2 @@
 from .test_basis_building import TestBosonicBasis
+from .test_basis_swap_operators import TestExcitationMotion
