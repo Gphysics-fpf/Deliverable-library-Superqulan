@@ -8,6 +8,14 @@ class TestBosonicBasis(TestCase):
         self.assertTrue(len(basis) == len(state_list))
         self.assertTrue(all(s in basis for s in state_list))
 
+    def assertIdenticalBasis(self, basis: Basis, sorted_state_list: list[State]):
+        """Verify that the basis contains the given list of configurations."""
+        self.assertTrue(len(basis) == len(sorted_state_list))
+        other_basis = {
+            state: position for position, state in enumerate(sorted_state_list)
+        }
+        self.assertTrue(basis == other_basis)
+
     def assertEqualExcitations(self, basis: Basis, excitations: int):
         """Verify that all states have the same number of `excitations`"""
         self.assertTrue(all(len(a) == excitations for a in basis))
@@ -79,21 +87,25 @@ class TestBosonicBasis(TestCase):
         )
 
     def test_2_qubit_2_boson_2_excitations(self):
-        self.assertEqualBasis(
+        self.assertIdenticalBasis(
             construct_basis(qubits=2, bosons=2, excitations=2),
             [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3)],
         )
 
     def test_zero_excitation_basis_is_trivial(self):
+        """For zero excitations, we only create the vacuum state, represented by
+        an empty tuple."""
         self.run_for_all_combinations(
-            lambda modes, excitations, basis: self.assertEqualBasis(basis, [()]),
+            lambda modes, excitations, basis: self.assertIdenticalBasis(basis, [()]),
             excitation_range=[0],
             max_modes=100,
         )
 
-    def test_one_excitation_basis_is_trivial(self):
+    def test_one_excitation_basis_is_sorted(self):
+        """The basis for 1 excitation is a map between the occupied mode (mode,) and
+        the index to that mode, which is the number 'mode' itself"""
         self.run_for_all_combinations(
-            lambda modes, excitations, basis: self.assertEqualBasis(
+            lambda modes, excitations, basis: self.assertIdenticalBasis(
                 basis, list((i,) for i in range(modes))
             ),
             excitation_range=[1],
