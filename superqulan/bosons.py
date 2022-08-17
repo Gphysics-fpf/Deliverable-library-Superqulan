@@ -10,13 +10,10 @@ State = tuple[int, ...]
 Basis = dict[State, int]
 
 
-def construct_basis(
-    qubits: int,
-    bosons: int,
-    excitations: int,
-) -> Basis:
-    """Construct the basis for a given number of qubits and bosons with a
-    fixed number of excitations.
+def construct_basis(qubits: int, bosons: int, excitations: int) -> Basis:
+    """
+    Construct the basis for a given number of 'qubits' and 'bosons' with a fixed
+    number of 'excitations'.
 
     Creates the basis of all possible occupied modes for the given number of
     `excitations`. Each state is represented by a sorted tuple of the modes that
@@ -25,7 +22,7 @@ def construct_basis(
     to `excitations`.
 
     Args:
-        qubits (int): Number of qubits >= 0
+        qubits (int): Number of qubits or hard-core boson modes >= 0
         bosons (int): Number of bosonic modes >= 0
         excitations (int): Number of excitations >= 0
 
@@ -69,6 +66,24 @@ def unphysical_state(configuration: State, qubits: int) -> bool:
         last = mode
 
 
+def number_operator(basis: Basis, mode: int) -> sp.csr_matrix:
+    """Create the number operator for the given 'mode' in this 'basis'.
+
+    Args:
+        basis (Basis): basis of bosonic states
+        mode (int): mode index (>= 0)
+
+    Returns:
+        sp.csr_matrix: diagonal matrix representing the occupation of 'mode'
+    """
+    L = len(basis)
+    rows = np.arange(L)
+    occupation = np.zeros((L,))
+    for state, ndx in basis.items():
+        occupation[ndx] = state.count(mode)
+    return sp.csr_matrix((occupation, (rows, rows)), shape=(L, L))
+
+
 def move_excitation_operator(
     origin_mode: int, destination_mode: int, basis: Basis
 ) -> sp.csr_matrix:
@@ -92,19 +107,14 @@ def move_excitation_operator(
     for state in basis:
         origin_occupation = state.count(origin_mode)
         if origin_occupation:
-
             ndx = state.index(origin_mode)
-
             transformed_state = tuple(
                 sorted(state[:ndx] + state[ndx + 1 :] + (destination_mode,))
             )
-            # Construct the tupple without remove adding instead add.
-            # Sort it before looking for it in basis VEERY important.
             if transformed_state in basis:
-
                 destination_occupation = transformed_state.count(destination_mode)
-                row.append(basis[state])
-                column.append(basis[transformed_state])
+                row.append(basis[transformed_state])
+                column.append(basis[state])
                 coefficient.append(np.sqrt(origin_occupation * destination_occupation))
 
     return sp.csr_matrix((coefficient, (row, column)), shape=(len(basis), len(basis)))
@@ -129,17 +139,13 @@ def diagonals_with_energies(basis: Basis, frequencies: np.ndarray) -> sp.dia_mat
     return sp.diags(energy)
 
 
-def concatenate_bases(
-    qubits: int = 2,
-    bosons: int = 30,
-    excitations: int = 2,
-) -> Basis:
-
-    """Function that takes as inputs the number of components of the setup and Nexcitations
-    constructs the basis resulting from the concatenation of subspaces up to these Nexcitations'.
+def concatenate_basis(qubits: int, bosons: int, excitations: int) -> Basis:
+    """
+    Create a basis with a variable number of excitations, from 0 up to 'excitations',
+    using the given number of 'qubits' and 'bosons' modes.
 
     Args:
-        qubits (int): Number of qubits >= 0
+        qubits (int): Number of qubits or hard-core boson modes >= 0
         bosons (int): Number of bosonic modes >= 0
         excitations (int): Number of excitations of the biggest subspace >= 0
 
@@ -189,56 +195,39 @@ def concatenate_bases(
     return Basis
 
 
-def erase(remove: int, Basis: dict) -> sp.csr_matrix:
-
+def erase(mode: int, basis: Basis) -> sp.csr_matrix:
     """Creates a sparse matrix representation of an operator that erases an excitation
-    from 'remove'.
+    from 'mode'.
+
+    This function creates the sparse matrix representation of a Fock anihilation
+    operator in the given 'basis'.
+
+    For this function to make sense, 'basis' must contain states from 0 up to a
+    maximum number of excitations. Otherwise, when we remove 'mode' we will not find
+    a good state to map it to.
 
     Args:
-        remove (int): Index of the mode from which the excitation is going to be removed
-        destination (int): Index of the destination mode
-        basis (dict): Collection of physical states (see: construct_basis)
+        mode (int): Index of the mode from which the excitation is going to be removed
+        basis (Basis): Collection of physical states (see: construct_basis)
 
     Returns:
-        Operator (sp.csr_matrix): Matrix representation of the quantum operator"""
+        Operator (sp.csr_matrix): Matrix representation of the quantum operator
+    """
     row = []
     column = []
     coefficient = []
+    for state in basis:
+        # We run over all states in the basis. If the 'mode' is present
+        # we construct a new state where we have removed _one_ occurrence of
+        # this mode, thus eliminating a particle.
+        count = state.count(mode)
+        if count:
+            # Since the modes are sorted in the state, we can assume the outcome
+            # is sorted.
+            mode_position = state.index(mode)
+            transformed = tuple(state[:mode_position] + state[mode_position + 1 :])
+            row.append(basis[transformed])
+            column.append(basis[state])
+            coefficient.append(np.sqrt(count))
 
-    for (
-        v
-    ) in (
-        Basis
-    ):  # we run through the elements of the basis, now well labeled, the vectors are the keys.
-
-        count = v.count(
-            remove
-        )  # Count how many times the excitation is located in the remove box
-
-        if count:  # Whenever count is not zero, transform the vector
-
-            ndx = v.index(
-                remove
-            )  # Obtain the position in the vector of the first excitation to remove.
-
-            transformed = tuple(
-                sorted(v[:ndx] + v[ndx + 1 :])
-            )  # Construct the tupple without remove (erasing the lelement we wanted to).
-            # Sort it before looking for it in basis VEERY important.
-            if transformed in Basis:
-
-                print(
-                    "Maps the element",
-                    Basis[v],
-                    "onto the element",
-                    Basis[transformed],
-                    "with coefficient",
-                    np.sqrt(count),
-                )
-
-                # row.append(Basis[v]), column.append(Basis[transformed]), coefficient.append(np.sqrt(count))
-                row.append(Basis[transformed]), column.append(
-                    Basis[v]
-                ), coefficient.append(np.sqrt(count))
-
-    return sp.csr_matrix((coefficient, (row, column)), shape=(len(Basis), len(Basis)))
+    return sp.csr_matrix((coefficient, (row, column)), shape=(len(basis), len(basis)))
