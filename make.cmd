@@ -8,7 +8,6 @@ if "%1" == "check" (
     echo ***
     echo *** Running test suite
     echo ***
-    cd tests
     python -m unittest tests
     goto :eof
 )
