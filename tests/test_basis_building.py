@@ -1,8 +1,8 @@
-from unittest import TestCase
+import unittest
 from superqulan.bosons import construct_basis, Basis, State
 
 
-class TestBosonicBasis(TestCase):
+class TestBosonicBasis(unittest.TestCase):
     def assertEqualBasis(self, basis: Basis, state_list: list[State]):
         """Verify that the basis contains the given list of configurations."""
         self.assertTrue(len(basis) == len(state_list))
