@@ -19,6 +19,20 @@ class TestBosonicBasis(TestCase):
         indices = sorted(b for _, b in basis.items())
         self.assertTrue(all(i == j for i, j in zip(indices, range(L))))
 
+    def assertModesAreSorted(self, basis: Basis):
+        """Verify that the basis contains indices to all states in the basis,
+        without duplicates."""
+        self.assertTrue(all(s == tuple(sorted(s)) for s in basis))
+
+    def run_for_all_combinations(self, function, excitation_range=[1], max_modes=4):
+        for excitations in excitation_range:
+            for modes in range(max_modes + 1):
+                for qubits in range(modes):
+                    basis = construct_basis(
+                        qubits=qubits, bosons=modes - qubits, excitations=excitations
+                    )
+                    function(modes, excitations, basis)
+
     def test_qubits_and_bosons_same_for_1_excitation(self):
         for modes in range(4):
             last = None
@@ -51,4 +65,51 @@ class TestBosonicBasis(TestCase):
         one_boson_1 = [(0,)]
         self.assertEqualBasis(
             construct_basis(qubits=0, bosons=1, excitations=1), one_boson_1
+        )
+
+    def test_1_qubit_1_boson_2_excitations(self):
+        self.assertEqualBasis(
+            construct_basis(qubits=1, bosons=1, excitations=2), [(0, 1), (1, 1)]
+        )
+
+    def test_1_qubit_2_boson_2_excitations(self):
+        self.assertEqualBasis(
+            construct_basis(qubits=1, bosons=2, excitations=2),
+            [(0, 1), (0, 2), (1, 1), (1, 2), (2, 2)],
+        )
+
+    def test_2_qubit_2_boson_2_excitations(self):
+        self.assertEqualBasis(
+            construct_basis(qubits=2, bosons=2, excitations=2),
+            [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3)],
+        )
+
+    def test_zero_excitation_basis_is_trivial(self):
+        self.run_for_all_combinations(
+            lambda modes, excitations, basis: self.assertEqualBasis(basis, [()]),
+            excitation_range=[0],
+            max_modes=100,
+        )
+
+    def test_one_excitation_basis_is_trivial(self):
+        self.run_for_all_combinations(
+            lambda modes, excitations, basis: self.assertEqualBasis(
+                basis, list((i,) for i in range(modes))
+            ),
+            excitation_range=[1],
+            max_modes=100,
+        )
+
+    def test_number_of_excitations_is_right(self):
+        def test(modes, excitations, basis):
+            self.assertEqualExcitations(basis, excitations)
+            self.assertBasisContainsAllIndices(basis)
+
+        self.run_for_all_combinations(test, excitation_range=range(5), max_modes=4)
+
+    def test_basis_states_contains_sorted_modes(self):
+        self.run_for_all_combinations(
+            lambda modes, excitations, basis: self.assertModesAreSorted(basis),
+            excitation_range=range(5),
+            max_modes=4,
         )
