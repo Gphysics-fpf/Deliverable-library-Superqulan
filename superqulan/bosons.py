@@ -9,8 +9,6 @@ State = tuple[int, ...]
 """Basis: A dictionary mapping states to positions in a vector state"""
 Basis = dict[State, int]
 
-""" Routines for the construction of the Operators in Hilbert space """
-
 
 def construct_basis(
     qubits: int,
@@ -20,20 +18,26 @@ def construct_basis(
     """Construct the basis for a given number of qubits and bosons with a
     fixed number of excitations.
 
+    Creates the basis of all possible occupied modes for the given number of
+    `excitations`. Each state is represented by a sorted tuple of the modes that
+    are occupied. Modes 0 up to (qubits-1) are hard-core boson modes and thus
+    can only appear once. All other modes are ordinary bosons and may host 0 up
+    to `excitations`.
+
     Args:
         qubits (int): Number of qubits >= 0
         bosons (int): Number of bosonic modes >= 0
         excitations (int): Number of excitations >= 0
 
     Returns:
-        basis: Collection of all the states that constitute the basis properly sorted.
+        basis: Map from configurations to an index in the Hilbert space basis
     """
 
     def make_bosonic_states(n_modes: int, excitations: int):
         return itertools.combinations_with_replacement(np.arange(n_modes), excitations)
 
     def select_hardcore_boson_states(qubits: int, states: Iterable) -> Iterable:
-        return itertools.filterfalse(lambda x: unphysical_states(x, qubits), states)
+        return itertools.filterfalse(lambda x: unphysical_state(x, qubits), states)
 
     return {
         v: i
@@ -45,44 +49,32 @@ def construct_basis(
     }
 
 
-def unphysical_states(Basis_element: tuple, Nqubits: int) -> bool:
-
-    """Checks wether in a given qubit position there is more than one
-    excitation and returns True in such case.
+def unphysical_state(configuration: State, qubits: int) -> bool:
+    """Given a sorted list of occupied modes, check whether a qubit mode
+    appears more than once.
 
     Args:
-        Basis_element (tuple): Number of qubits >= 0
-        Nqubits (int): Number of bosonic modes >= 0
+        configuration (State): Sorted tuple with the occupied modes
+        qubits (int): Number of hard-core boson modes >= 0
 
     Returns:
         bool: False if state is physical, True if it is not.
     """
-
-    if (
-        Basis_element[0] >= Nqubits
-    ):  # If the fist component is not qubit, then there no qubit excitations in this state. Therefore physical.
-
-        return False
-
-    for i in range(
-        len(Basis_element) - 1
-    ):  # If there are qubits run through the components.
-
-        if (
-            Basis_element[i] == Basis_element[i + 1]
-            and Basis_element[i] < Nqubits
-            and Basis_element[i + 1] < Nqubits
-        ):  # If two qubit excitations are consecutive, unphysical. return true.
-
+    last = -1
+    for mode in configuration:
+        if mode >= qubits:
+            return False
+        if last == mode:
             return True
+        last = mode
 
 
 def move_excitation_operator(
     origin_mode: int, destination_mode: int, basis: Basis
 ) -> sp.csr_matrix:
-
-    """Creates a sparse matrix representation of an operator that moves an excitation
-    from 'origin' to 'destination'.
+    """
+    Create a sparse matrix representation of an operator that moves an
+    excitation from mode 'origin' to mode 'destination'.
 
     Args:
         origin (int): Index of the origin mode
@@ -96,11 +88,6 @@ def move_excitation_operator(
     row = []
     column = []
     coefficient = []
-
-    """ The states in the basis are represented as lists of modes where we 
-    are going to place excitations. One mode can be repeated if it hosts more 
-    than one excitation. Moving one excitation means replacing the integer of 
-    the origin mode by the integer of the destinaton mode."""
 
     for state in basis:
         origin_occupation = state.count(origin_mode)
@@ -185,7 +172,7 @@ def concatenate_bases(
 
             def select_hardcore_boson_states(qubits: int, states: Iterable) -> Iterable:
                 return itertools.filterfalse(
-                    lambda x: unphysical_states(x, qubits), states
+                    lambda x: unphysical_state(x, qubits), states
                 )
 
             for i, v in enumerate(
