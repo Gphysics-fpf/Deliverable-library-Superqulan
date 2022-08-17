@@ -8,7 +8,7 @@ if "%1" == "check" (
     echo ***
     echo *** Running test suite
     echo ***
-    python -m unittest tests
+    python -m unittest tests -v
     goto :eof
 )
 if "%1" == "clean" (
